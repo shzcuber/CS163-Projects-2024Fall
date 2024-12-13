@@ -6,7 +6,7 @@ author: Shawn Zhuang, Allen Luo, William Smith, Howard Huang
 date: 2024-12-07
 ---
 
-> Gaussian Splatting is a novel 3D reconstruction algorithm, radically improving the generation time compared to NeRFs using 3D Gaussians. In this project, we review its implementaiton as well as several applications of the more capable 3D reconstruction algorithm.
+> Gaussian Splatting is a novel 3D reconstruction algorithm, radically improving the generation time compared to NeRFs using 3D Gaussians. In this project, we review its implementation as well as several applications of the more capable 3D reconstruction algorithm.
 
 <!--more-->
 
