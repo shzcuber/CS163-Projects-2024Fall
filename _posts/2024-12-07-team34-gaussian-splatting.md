@@ -49,16 +49,93 @@ However, this implicit representation makes rendering times large. In addition, 
 _Fig 3. NeRFs_
 
 ## 3D Gaussian Splatting
+3D Gaussian Splatting consists of a three step process
+1. Scene representation with 3D Gaussians
+2. 3D Gaussian optimization
+3. Real-time rendering algorithm
+
+Fig X. 3D Gaussian Splatting Pipeline
 
 ### 3D Gaussians
+3D Gaussians are initialized by a set of 3D points from SfM and characterized by 4 parameters:
+- Mean 𝜇 (3D point)
+- Covariance matrix Σ
+- Opacity 𝛼
+- Color c (spherical harmonics coefficients)
+
+Fig X. Effect of a 3D gaussian on a 3D point p
+Fig X. Equation definition of a 3D 
+Gaussian. x is the 3d point/mean, and Σ is the covariance matrix.
 
 ### 3D Gaussian Optimization
+Gaussian optimization is the optimization process that gradually refines the rendering of the 3D scene through Iterations of rendering and comparison with training views. Fine-grained Adaptive control of Gaussians can be achieved by focusing on regions with missing geometric features and regions where Gaussians cover large regions. To do this, two basic operations are performed:
+- Small Gaussians in under reconstructed regions are cloned
+- Large Gaussians in regions of high variance split up into two new Gaussians 
+
+Fig X. Algorithm for under/over-reconstructed regions during gaussian optimization.
+Comparisons with the rendered and training images use a combination of L1 Loss and D-SSIM Loss, defined as (𝜆 is a hyperparameter; it is set to 0.2 in the original paper):
+Fig X. Loss term for 3DGS.
 
 ### 3D Gaussian Rasterizer
+Finally, the 3D Gaussian Rasterizer is what is responsible for actually rendering the gaussians in the 3D scene. As opposed to traditional geometric primitives/shapes like triangles and polygons, the 3D Gaussian Rasterizer renders gaussian blots. To create a rendered view, the rasterizer projects 3D Gaussian distributions into a 2D image plane using a perspective or orthogonal projection, mimicking how a camera sees a 2D plane. To achieve blending and accumulation, the Rasterizer blends overlapping Gaussians by accumulating their contributions to pixel values in the rendered image using alpha blending or similar techniques to simulate transparency and lighting effects. To achieve depth ordering and occlusion handling, the Rasterizer makes it so that closer Gaussians occlude farther ones which might involve sorting Gaussians or using depth-buffer-mechanisms. Finally, to achieve light and shading effects, the Rasterizer incorporates shading effects by adjusting intensity and color of gaussians based on lightning conditions.
 
 ### Results
+Fig X. 3DGS results
 
 ## Applications
+3D gaussian splatting can be used for many different applications. We will cover a few here:
+Geometry Editing
+Definition:
+Geometry editing refers to modifying the spatial arrangement, structure, or properties of 3D blobs to define the underlying surface shape or characteristics of a 3D object
+Examples:
+Rigid Transformations: Moving, rotating, or scaling the object or parts of it.
+Non-Rigid Deformations: Stretching, bending, or warping parts of the object for more complex shape changes.
+Topology Adjustments: Adding or removing Gaussians to represent changes in the model's topology (e.g., splitting a face or creating holes).
+Advancements:
+Utilizing surface priors and explicit deformation methods to optimize Gaussian parameters and number
+Frosting Layer
+Techniques:
+Mesh-Based Editing: Combining Gaussian Splatting with conventional meshes to use mesh vertices for parameterizing Gaussian positions. This enables real-time edits but is limited in flexibility for significant topology changes.
+Regularization and Surface Priors: Using priors like surface normals and gradients from explicit deformation methods to maintain consistency during edits.
+Topology Optimization: Advanced methods like face splitting or adding Gaussians to dynamically adjust the model's topology.
+Challenges:
+Large-Scale Deformations: Significant changes in shape can be difficult because the relationship between Gaussians and the object surface might become inconsistent.
+Topology Modifications: Traditional GS struggles with modifying the connectivity or structure of the object, as Gaussians are often tied to a fixed mesh or surface.
+Appearance Editing
+Definition:
+Focuses on visual attributes of 3D objects, such as their color, texture, shading, and material properties rather than geometric properties.
+Gaussians in GS can store additional attributes like color, opacity, and texture information.
+Examples:
+Texture Painting: Adding or altering textures on the object's surface.
+Material Editing: Changing reflectivity, transparency, or other material properties.
+Lighting and Shadows: Adjusting how light affects the object, enabling relighting.
+Object Inpainting: Filling in missing or occluded regions to restore or create new details.
+Techniques:
+Language-Guided Editing: Using diffusion models (e.g., GaussianEditor) with natural language input to make targeted changes in appearance.
+Disentanglement: Separating geometry from appearance to allow independent modifications of texture and lighting (e.g., TextureGS and 3DGM).
+Mask-Based Updates: Applying segmentation models to isolate regions for editing while preserving surrounding details.
+Depth and Cross-Attention: Techniques like GaussCtrl and Wang et al. use depth maps or multi-view cross-attention to ensure consistency across perspectives.
+Challenges:
+Consistency: Ensuring that changes to appearance align with the object's geometry across different views.
+Interdependence: Appearance attributes like texture and lighting are intertwined with geometry, making disentanglement and independent editing complex.
+Complexity: High-quality edits require accounting for multi-view consistency and realistic rendering constraints.
+Physical Simulation
+Definition:
+Supports realistic simulations for fluid dynamics, motion, and collisions.
+Physical properties like mass, velocity, and surface normals are encoded into Gaussian parameters for simulation purposes.
+Applications:
+Solid and Fluid Dynamics: Simulating interactions between solids (e.g., deformable objects) and fluids (e.g., water, smoke).
+Physically-Based Rendering: Incorporating realistic reflections, refractions, and lighting effects based on physical interactions.
+Dynamic Behavior: Modeling real-world behaviors like elasticity, collisions, and deformation using particle-based dynamics.
+Techniques:
+Particle-Based Dynamics (PBD): Gaussian Splashing integrates 3DGS with PBD to simulate cohesive dynamics, including solid-fluid interactions and dynamic rendering.
+Continuum Deformation: PhysGaussian applies deformation models to Gaussian kernels, simulating physically realistic changes in shape and rendering.
+Spring-Mass Models: Spring-Gaus employs spring-mass systems to simulate dynamic properties, extracting parameters like mass and velocity from real-world inputs like videos.
+Surface Alignment: Normal-based alignment ensures that Gaussians conform to realistic surface orientations, improving physical and visual consistency.
+Challenges:
+Realism: Achieving physically accurate results while maintaining computational efficiency.
+Integration: Combining simulation with rendering and other Gaussian attributes like appearance or geometry.
+Dynamic Adaptation: Adjusting Gaussian parameters dynamically to reflect changing physical states (e.g., deformation, splitting).
 
 ### Mesh Extraction (SuGaR)
 
@@ -97,6 +174,14 @@ _Fig 4. DreamGaussian framework for generation and mesh extraction_
 _Fig 4. Comparison of generation speed and mesh quality between DreamGaussian and previous works_
 
 ### Instant Splat
+Task
+The goal of InstantSplat is to address the shortcomings of COLMAP when its randomly initialized Gaussians or sparse SfM points fail with sparse-view data or data with too few images and lacks an error correction mechanism which causes errors to build up over time. 
+3 Main Contributions: 
+The overall architecture of Instant splat consists of a pipeline that integrates Multi-View Stereo (MVS) with 3D-GS to address sparse-view reconstruction in the reliance on SfM and training efficiency. 
+
+InstantSplat also introduces an efficient, confidence-aware point downsampler address scene overparameterization. 
+
+Finally, InstantSplat proposes a self-correction mechanism in the form of a gradient-based joint optimization framework using photometric loss to align the Gaussians and camera parameters in a self-supervised manner 
 
 ## Running Existing Codebases
 
