@@ -12,8 +12,8 @@ date: 2024-12-07
 
 {: class="table-of-content"}
 
-- Problem Statement
-  {:problem-statement}
+-   Problem Statement
+    {:problem-statement}
 
 ## Problem Statement
 
@@ -79,12 +79,22 @@ _Fig 3. Deformable 3DGS_
 
 ### DreamGaussian
 
-DreamGaussian is a 3D content generation framework that adapts 3D Gaussian splatting for image-to-3D mesh generation. Previous iterations of 3D content generation frameworks utilized NeRFs, but using 3DGS, speed and efficiency has been drastically improved. The implementation includes alleviating blurriness in directly generated 3D Gaussians by designing an efficient mesh extraction algorithm from 3D Gaussians using local density querying. In addition a generative UV-space refinement stage is proposed to enhance the texture details.
-Notably as well, score distillation sampling (SDS) is used to calculate the loss -- this addresses the 3D data limitation, distilling 3D geometry and appearance from powerful 2D diffusion models. Lastly, it adopts a 3DGS Gaussian culling technique with Marching Cubes for efficient rasterization.
+DreamGaussian is a 3D content generation framework that adapts 3D Gaussian splatting for image-to-3D mesh generation. Previous iterations of 3D content generation frameworks utilized Neural Radiance Fields (NeRFs), but these approaches typically require hour-long optimizations that limit their use for real-world applications. DreamGaussian is inspired by the contributions of 3D Gaussian Splatting and Zero-1-to-3, a NeRF-based diffusion framework that synthesizes novel views of an object given a single input view [10].
+
+DreamGaussian leverages the efficiency of 3D Gaussian Splatting by representing the 3D scene as a collection of small, localized Gaussian functions. 3D Gaussians are initialized randomly and then iteratively optimized to reconstruct the input, refining position, scale, and orientation of each Gaussian. A Score Distillation Sampling (SDS) loss distills 3D geometry and appearance from 2D diffusion models [11], minimizing the difference between the rendered images and the text prompt or, in our case, input images. An overview of the pipeline is as follows:
 
 ![DreamGaussian]({{ '/assets/images/34/dream.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-_Fig 4. DreamGaussian_
+_Fig 4. DreamGaussian framework for generation and mesh extraction_
+
+1. Score Distillation Sampling is used to sample from the Zero-1-to-3 XL diffusion prior and densify the Gaussians
+2. A local density query algorithm is performed to extract mesh geometry. The Marching Cubes algorithm is adapted with culled Gaussians to reduce queries in blocks for efficient rasterization, and the weighted opacity of each 3D Gaussian is summed.
+3. The rendered RGB image is back-projected to the mesh surface and baked as the texture by unwrapping the mesh's UV coordinates and sampling 9 azimuths and 3 elevations to render. This texture image serves as an initialization for texture fine-tuning.
+4. fff
+
+![DreamGaussian Results]({{ '/assets/images/34/dreamgaussian_results.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+_Fig 4. Comparison of generation speed and mesh quality between DreamGaussian and previous works_
 
 ### Instant Splat
 
@@ -96,23 +106,26 @@ We first ran vanilla 3D Gaussian Splatting as described in the foundation paper 
 
 ![3DGS Train]({{ '/assets/images/34/gaussian_splatting_train.gif' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-_Fig 4. DreamGaussian_
+_Fig 4. Vanilla 3D Gaussian Splatting train scene_
+
 ![3DGS Truck]({{ '/assets/images/34/gaussian_splatting_truck.gif' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-_Fig 4. DreamGaussian_
+_Fig 4. Vanilla 3D Gaussian Splatting truck scene_
 
-There are noticeable artifacts present in the final splats, as well as low-resolution surfaces with rough edges due to a shorter training time (~1 hour). Generated scenes would be of higher quality if trained for 48 hours as in the original 3DGS implementation, or by using an optimized method like InstantSplat. We attempted to run the scenes with the online [InstantSplat demo](https://huggingface.co/spaces/kairunwen/InstantSplat), but it seems to not be currently maintained.
+There are noticeble artifacts present in the final splats, as well as low-resolution surfaces with rough edges due to a shorter training time (~1 hour). Generated scenes would be of higher quality if trained for 48 hours as in the original 3DGS implementation, or by using an optimized method like InstantSplat. We attempted to run the scenes with the online [InstantSplat demo](https://huggingface.co/spaces/kairunwen/InstantSplat), but it seems to not be currently maintained.
 
 ### DreamGaussian
 
 We ran DreamGaussian on a single view of a T-Rex from the D-NeRF synthetic dataset, which was used to benchmark Deformable 3D Gaussian Splatting. We obtained the following result, placed alongside the Deformable 3DGS render for comparison. For context, the original scene contains 220 training views for training and validation.
 
 ![Deformable 3DGS T-Rex]({{ '/assets/images/34/deformable_trex.gif' | relative_url }})
-{: style="width: 800px; max-width: 100%;"}
-_Fig 4. Deformable 3DGS T-Rex_
+{: style="width: 400px; max-width: 100%; margin: 0 auto;"}
+
+_Fig 4. Render of T-Rex with Deformable 3DGS_
+
 ![DreamGaussian T-Rex]({{ '/assets/images/34/dreamgaussian_trex.gif' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-_Fig 4. DreamGaussian T-Rex_
+_Fig 4. Render of T-Rex with DreamGaussian (single input view)_
 
 Multi-view Gaussian splatting methods still significantly outperform single-view methods in terms of reconstruction quality. However, these generative methods can serve as a solid baseline for efficient 3D content creation, especially given that it requires just a single view and the model outputs a solid mesh that can be easily modified. Single-view applications of 3D Gaussian Splatting are still a very active area of research.
 
@@ -127,3 +140,7 @@ Multi-view Gaussian splatting methods still significantly outperform single-view
 [4] Guédon, Antoine, and Vincent Lepetit. "Sugar: Surface-aligned gaussian splatting for efficient 3d mesh reconstruction and high-quality mesh rendering." Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2024.
 
 [5] Fan, Zhiwen, Cong, Wenyan, Wen, Kairun, Wang, Kevin, Zhang, Jian, Ding, Xinghao, Xu, Danfei, Ivanovic, Boris, Pavone, Marco, Pavlakos, Georgios, Wang, Zhangyang, and Wang, Yue. [_InstantSplat: Unbounded Sparse-view Pose-free Gaussian Splatting in 40 Seconds_](https://arxiv.org/abs/2403.20309). _arXiv preprint arXiv:2403.20309_, 2024.
+
+[10] Liu, Ruoshi, et al. Zero-1-to-3: Zero-Shot One Image to 3D Object. arXiv:2303.11328, arXiv, 20 Mar. 2023. arXiv.org, https://doi.org/10.48550/arXiv.2303.11328.
+
+[11] Poole, Ben, et al. DreamFusion: Text-to-3D Using 2D Diffusion. arXiv:2209.14988, arXiv, 29 Sept. 2022. arXiv.org, https://doi.org/10.48550/arXiv.2209.14988.
