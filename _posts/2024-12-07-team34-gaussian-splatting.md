@@ -106,7 +106,7 @@ _Fig 4. 3DGS Results_.
 
 ## Applications
 3D gaussian splatting can be used for many different applications. We will cover a few here:
-Geometry Editing
+#### Geometry Editing
 Definition:
 Geometry editing refers to modifying the spatial arrangement, structure, or properties of 3D blobs to define the underlying surface shape or characteristics of a 3D object
 Examples:
@@ -160,6 +160,19 @@ Integration: Combining simulation with rendering and other Gaussian attributes l
 Dynamic Adaptation: Adjusting Gaussian parameters dynamically to reflect changing physical states (e.g., deformation, splitting).
 
 ### Mesh Extraction (SuGaR)
+The goal of SuGaR is to produce a method to quickly and efficiently extract meshes from 3D Gaussian Splatting. SuGaR introduces the following methods to assist in mesh extraction: regularization, mesh extraction through poisson reconstruction, and an optimizer.
+
+In vanilla 3DGS, the Gaussians do not generally have an ordered structure or correspond well to the scene's surfaces. This makes it extremely difficult to extract meshes from the Gaussians. To combat this, a regularization term is added into the Gaussian Splatting optimization that helps align the Gaussians with the scene surface while also being evenly distributed over the surface. This is done through deriving a Signed Distance Function assuming that the Gaussians already have the desired properties, and then minimizing the differences between this SDF and the actual one computed by the Gaussians. The regularization term is defined as:
+$$R = (1 / |P|) ∑ |f̂(p) - f(p)|$$
+where f(p) = ± sg* sqrt(-2 log(d(p))), the "ideal" distance function associated with the density function d, f̂(p) is the estimate of the SDF of the surface currently created by the Gaussians, and P is the set of sampled points.
+Another regularization term is also added to encourage the normals of SDFs f and f̂ to be similar:
+$$R_Norm = (1 / |P|) ∑ ||(∇f(p) / ||∇f(p)||_2) - n g*||^2_2$$
+
+For mesh extraction, Poisson reconstruction is run on sampled 3D points from a level set of the density computed from the Gaussians. To identify points on the level set with level parameter λ, points are first randomly sampled from the depth maps of the Gaussians as seen from the training viewpoints. For each randomly selected point, the line of sight is then sampled within 3 standard deviations of the 3D Gaussian in the direction of the camera to find a point on the level set. From these points, density values can then be calculated, and level set points and their normals can be found. Poisson reconstruction is then run on these points to construct a mesh.
+
+Fig X. How SuGaR samples points on the depth map for Poisson reconstruction
+The mesh can then be further refined by initializing new 3D Gaussians on the mesh and using the Gaussian Splatting rasterizer to optimize.
+SuGaR outperforms many of the state-of-the-art methods for Novel View Synthesis using mesh and also outperforms some of the SOTA models that focus only on rendering. SuGaR also often has performance similar to SOTA models for rendering quality.
 
 ### Deformable 3DGS
 
