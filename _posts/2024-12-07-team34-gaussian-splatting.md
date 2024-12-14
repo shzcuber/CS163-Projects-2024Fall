@@ -106,55 +106,55 @@ _Fig 4. 3DGS Results_.
 
 ## Applications
 3D gaussian splatting can be used for many different applications. We will cover a few here:
-#### Geometry Editing
-Definition:
+### Geometry Editing
+#### Definition:
 Geometry editing refers to modifying the spatial arrangement, structure, or properties of 3D blobs to define the underlying surface shape or characteristics of a 3D object
-Examples:
+#### Examples:
 Rigid Transformations: Moving, rotating, or scaling the object or parts of it.
 Non-Rigid Deformations: Stretching, bending, or warping parts of the object for more complex shape changes.
 Topology Adjustments: Adding or removing Gaussians to represent changes in the model's topology (e.g., splitting a face or creating holes).
-Advancements:
+#### Advancements:
 Utilizing surface priors and explicit deformation methods to optimize Gaussian parameters and number
 Frosting Layer
-Techniques:
+#### Techniques:
 Mesh-Based Editing: Combining Gaussian Splatting with conventional meshes to use mesh vertices for parameterizing Gaussian positions. This enables real-time edits but is limited in flexibility for significant topology changes.
 Regularization and Surface Priors: Using priors like surface normals and gradients from explicit deformation methods to maintain consistency during edits.
 Topology Optimization: Advanced methods like face splitting or adding Gaussians to dynamically adjust the model's topology.
-Challenges:
+#### Challenges:
 Large-Scale Deformations: Significant changes in shape can be difficult because the relationship between Gaussians and the object surface might become inconsistent.
 Topology Modifications: Traditional GS struggles with modifying the connectivity or structure of the object, as Gaussians are often tied to a fixed mesh or surface.
-Appearance Editing
-Definition:
+### Appearance Editing
+#### Definition:
 Focuses on visual attributes of 3D objects, such as their color, texture, shading, and material properties rather than geometric properties.
 Gaussians in GS can store additional attributes like color, opacity, and texture information.
-Examples:
+#### Examples:
 Texture Painting: Adding or altering textures on the object's surface.
 Material Editing: Changing reflectivity, transparency, or other material properties.
 Lighting and Shadows: Adjusting how light affects the object, enabling relighting.
 Object Inpainting: Filling in missing or occluded regions to restore or create new details.
-Techniques:
+#### Techniques:
 Language-Guided Editing: Using diffusion models (e.g., GaussianEditor) with natural language input to make targeted changes in appearance.
 Disentanglement: Separating geometry from appearance to allow independent modifications of texture and lighting (e.g., TextureGS and 3DGM).
 Mask-Based Updates: Applying segmentation models to isolate regions for editing while preserving surrounding details.
 Depth and Cross-Attention: Techniques like GaussCtrl and Wang et al. use depth maps or multi-view cross-attention to ensure consistency across perspectives.
-Challenges:
+#### Challenges:
 Consistency: Ensuring that changes to appearance align with the object's geometry across different views.
 Interdependence: Appearance attributes like texture and lighting are intertwined with geometry, making disentanglement and independent editing complex.
 Complexity: High-quality edits require accounting for multi-view consistency and realistic rendering constraints.
-Physical Simulation
-Definition:
+### Physical Simulation
+#### Definition:
 Supports realistic simulations for fluid dynamics, motion, and collisions.
 Physical properties like mass, velocity, and surface normals are encoded into Gaussian parameters for simulation purposes.
-Applications:
+#### Applications:
 Solid and Fluid Dynamics: Simulating interactions between solids (e.g., deformable objects) and fluids (e.g., water, smoke).
 Physically-Based Rendering: Incorporating realistic reflections, refractions, and lighting effects based on physical interactions.
 Dynamic Behavior: Modeling real-world behaviors like elasticity, collisions, and deformation using particle-based dynamics.
-Techniques:
+#### Techniques:
 Particle-Based Dynamics (PBD): Gaussian Splashing integrates 3DGS with PBD to simulate cohesive dynamics, including solid-fluid interactions and dynamic rendering.
 Continuum Deformation: PhysGaussian applies deformation models to Gaussian kernels, simulating physically realistic changes in shape and rendering.
 Spring-Mass Models: Spring-Gaus employs spring-mass systems to simulate dynamic properties, extracting parameters like mass and velocity from real-world inputs like videos.
 Surface Alignment: Normal-based alignment ensures that Gaussians conform to realistic surface orientations, improving physical and visual consistency.
-Challenges:
+#### Challenges:
 Realism: Achieving physically accurate results while maintaining computational efficiency.
 Integration: Combining simulation with rendering and other Gaussian attributes like appearance or geometry.
 Dynamic Adaptation: Adjusting Gaussian parameters dynamically to reflect changing physical states (e.g., deformation, splitting).
@@ -171,6 +171,11 @@ $$R_Norm = (1 / |P|) ∑ ||(∇f(p) / ||∇f(p)||_2) - n g*||^2_2$$
 For mesh extraction, Poisson reconstruction is run on sampled 3D points from a level set of the density computed from the Gaussians. To identify points on the level set with level parameter λ, points are first randomly sampled from the depth maps of the Gaussians as seen from the training viewpoints. For each randomly selected point, the line of sight is then sampled within 3 standard deviations of the 3D Gaussian in the direction of the camera to find a point on the level set. From these points, density values can then be calculated, and level set points and their normals can be found. Poisson reconstruction is then run on these points to construct a mesh.
 
 Fig X. How SuGaR samples points on the depth map for Poisson reconstruction
+
+![SuGaR Sampling]({{ '/assets/images/34/SuGaR Sampling.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+_Fig 4. SuGaR Sampling_.
+
 The mesh can then be further refined by initializing new 3D Gaussians on the mesh and using the Gaussian Splatting rasterizer to optimize.
 SuGaR outperforms many of the state-of-the-art methods for Novel View Synthesis using mesh and also outperforms some of the SOTA models that focus only on rendering. SuGaR also often has performance similar to SOTA models for rendering quality.
 
