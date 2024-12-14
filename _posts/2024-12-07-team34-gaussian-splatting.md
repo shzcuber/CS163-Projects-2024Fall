@@ -221,7 +221,11 @@ The overall architecture of Instant splat consists of a pipeline that integrates
 
 InstantSplat also introduces an efficient, confidence-aware point downsampler address scene overparameterization. 
 
-Finally, InstantSplat proposes a self-correction mechanism in the form of a gradient-based joint optimization framework using photometric loss to align the Gaussians and camera parameters in a self-supervised manner 
+Finally, InstantSplat proposes a self-correction mechanism in the form of a gradient-based joint optimization framework using photometric loss to align the Gaussians and camera parameters in a self-supervised manner. 
+
+![InstantSplat Framework]({{ '/assets/images/34/InstantSplatFramework.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+_Fig 4. InstantSplat Framework_
 
 ## Running Existing Codebases
 
