@@ -88,6 +88,34 @@ _Fig 4. DreamGaussian_
 
 ### Instant Splat
 
+## Running Existing Codebases
+
+### Vanilla 3D Gaussian Splatting
+
+We first ran vanilla 3D Gaussian Splatting as described in the foundation paper to reconstruct scenes. We obtained the following results with the provided example images:
+
+![3DGS Train]({{ '/assets/images/34/gaussian_splatting_train.gif' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+_Fig 4. DreamGaussian_
+![3DGS Truck]({{ '/assets/images/34/gaussian_splatting_truck.gif' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+_Fig 4. DreamGaussian_
+
+There are noticeable artifacts present in the final splats, as well as low-resolution surfaces with rough edges due to a shorter training time (~1 hour). Generated scenes would be of higher quality if trained for 48 hours as in the original 3DGS implementation, or by using an optimized method like InstantSplat. We attempted to run the scenes with the online [InstantSplat demo](https://huggingface.co/spaces/kairunwen/InstantSplat), but it seems to not be currently maintained.
+
+### DreamGaussian
+
+We ran DreamGaussian on a single view of a T-Rex from the D-NeRF synthetic dataset, which was used to benchmark Deformable 3D Gaussian Splatting. We obtained the following result, placed alongside the Deformable 3DGS render for comparison. For context, the original scene contains 220 training views for training and validation.
+
+![Deformable 3DGS T-Rex]({{ '/assets/images/34/deformable_trex.gif' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+_Fig 4. Deformable 3DGS T-Rex_
+![DreamGaussian T-Rex]({{ '/assets/images/34/dreamgaussian_trex.gif' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+_Fig 4. DreamGaussian T-Rex_
+
+Multi-view Gaussian splatting methods still significantly outperform single-view methods in terms of reconstruction quality. However, these generative methods can serve as a solid baseline for efficient 3D content creation, especially given that it requires just a single view and the model outputs a solid mesh that can be easily modified. Single-view applications of 3D Gaussian Splatting are still a very active area of research.
+
 ## References
 
 [1] Kerbl, Bernhard, Kopanas, Georgios, Leimkühler, Thomas, and Drettakis, George. [_3D Gaussian Splatting for Real-Time Radiance Field Rendering_](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/). ACM Transactions on Graphics, 42(4), July 2023.
