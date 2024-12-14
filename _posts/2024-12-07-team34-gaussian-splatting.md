@@ -63,8 +63,20 @@ Fig X. 3D Gaussian Splatting Pipeline
 - Opacity 𝛼
 - Color c (spherical harmonics coefficients)
 
+![GuassianSplattingPipeline]({{ '/assets/images/34/GaussianSplattingPipeline.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+_Fig 4. GaussianSplattingPipeline_.
+
 Fig X. Effect of a 3D gaussian on a 3D point p
+![GuassianPoint]({{ '/assets/images/34/3DGaussianPoint.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+_Fig 4. 3D Gaussian Point_.
+
 Fig X. Equation definition of a 3D 
+![GuassianSplattingEquation]({{ '/assets/images/34/GaussianEquation.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+_Fig 4. Gaussian Splatting Equation_.
+
 Gaussian. x is the 3d point/mean, and Σ is the covariance matrix.
 
 ### 3D Gaussian Optimization
@@ -73,14 +85,24 @@ Gaussian optimization is the optimization process that gradually refines the ren
 - Large Gaussians in regions of high variance split up into two new Gaussians 
 
 Fig X. Algorithm for under/over-reconstructed regions during gaussian optimization.
+![Clone and Split]({{ '/assets/images/34/CloneAndSplit.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+_Fig 4. Clone and Split_.
+
 Comparisons with the rendered and training images use a combination of L1 Loss and D-SSIM Loss, defined as (𝜆 is a hyperparameter; it is set to 0.2 in the original paper):
 Fig X. Loss term for 3DGS.
+![3DGS Loss]({{ '/assets/images/34/3DGSLoss.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+_Fig 4. 3D GS Loss_.
 
 ### 3D Gaussian Rasterizer
 Finally, the 3D Gaussian Rasterizer is what is responsible for actually rendering the gaussians in the 3D scene. As opposed to traditional geometric primitives/shapes like triangles and polygons, the 3D Gaussian Rasterizer renders gaussian blots. To create a rendered view, the rasterizer projects 3D Gaussian distributions into a 2D image plane using a perspective or orthogonal projection, mimicking how a camera sees a 2D plane. To achieve blending and accumulation, the Rasterizer blends overlapping Gaussians by accumulating their contributions to pixel values in the rendered image using alpha blending or similar techniques to simulate transparency and lighting effects. To achieve depth ordering and occlusion handling, the Rasterizer makes it so that closer Gaussians occlude farther ones which might involve sorting Gaussians or using depth-buffer-mechanisms. Finally, to achieve light and shading effects, the Rasterizer incorporates shading effects by adjusting intensity and color of gaussians based on lightning conditions.
 
 ### Results
 Fig X. 3DGS results
+![3DGS Results]({{ '/assets/images/34/3DGS Results.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+_Fig 4. 3DGS Results_.
 
 ## Applications
 3D gaussian splatting can be used for many different applications. We will cover a few here:
